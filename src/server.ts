@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import {APIHelpPackageContent, APIHelpPackageURL} from './server_helper'
+const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
 class PackageManagementAPI {
@@ -141,10 +142,37 @@ class PackageManagementAPI {
     res.json({ message: 'Package rated successfully' });
   }
 
+
   private handleAuthenticateUser(req: Request, res: Response) {
-    // Skeleton user authentication logic (replace with actual logic)
-    // Implement user authentication here, issue tokens, etc.
-    res.json({ message: 'User authenticated successfully' });
+    const secretKey: string = 'ECE461'
+    try {
+      const username: string = req.body.User.name;
+      const isAdmin: boolean = req.body.User.isAdmin;
+      const password: string = req.body.Secret.password;
+  
+      // Implement your actual user authentication logic here
+      const isValidUser = false//authenticateUser(username, password);
+      
+      //Temporary 'Base Case' Authentication
+      const valid = username === "ece30861defaultadminuser" && password === "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;";
+      if (isValidUser) {
+        // Create the user object to include in the JWT token
+        const userObj = {
+          username: username,
+          isAdmin: isAdmin,
+        };
+  
+        // Sign the JWT token
+        const token = jwt.sign(userObj, secretKey, { expiresIn: '10h' });
+  
+        // Return the token in the "Bearer" format
+        res.status(200).send(`"Bearer ${token}"`);
+      } else {
+        res.status(401).json({ error: 'User or Password is invalid' });
+      }
+    } catch (error) {
+      res.status(400).json({ error: 'Missing Fields' });
+    }
   }
 
   private handleGetPackageByName(req: Request, res: Response) {
