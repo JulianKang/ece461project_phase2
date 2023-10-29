@@ -12,7 +12,7 @@ const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database: process.env.DATABASE,
+    database: process.env.DB_NAME,
 };
 if (!dbConfig.host || !dbConfig.user || !dbConfig.password || !dbConfig.database) {
     console.error('Missing database configuration.'); // replace with logger when we gain access to it
