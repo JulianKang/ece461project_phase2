@@ -4,6 +4,7 @@
 
 import mysql from 'mysql2/promise';
 import 'dotenv/config';
+import { type } from 'node:os';
 
 /**
  * Database configuration object.
@@ -18,7 +19,7 @@ if (!dbConfig.host || !dbConfig.user || !dbConfig.password || !dbConfig.database
     console.error('Missing database configuration.'); // replace with logger when we gain access to it
     process.exit(1);
 }
-
+type QueryResult = mysql.OkPacket | mysql.RowDataPacket[] | mysql.ResultSetHeader[] | mysql.RowDataPacket[][] | mysql.OkPacket[] | mysql.ProcedureCallPacket;
 
 /* TODO List / Things to Implement/Consider:
     * - Add the logger to the DBCommunicator class
@@ -85,7 +86,7 @@ class DBCommunicator {
    * @param values - An array of values to replace placeholders in the SQL query.
    * @returns A promise that resolves with the query results or null on error.
    */
-  async query(sql: string, values: any[] = []) {
+  async query(sql: string, values: any[] = []) : Promise<QueryResult | null> {
     if (!this.connection) {
       console.error('Database connection not established.'); // replace with logger when we gain access to it
       return null;
