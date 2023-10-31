@@ -85,11 +85,12 @@ export async function fetchDataAndCalculateScore(inputUrl: string) {
         repoUrl = githubRepo;
       } else {
         winston.error(`Unable to find GitHub repository for npm package "${packageName}"`);
-        process.exit(1); // Exit with a failure status code (1) on error
+     //   process.exit(1); // Exit with a failure status code (1) on error
       }
     } else {
       winston.error(`Invalid npm package link: "${inputUrl}"`);
-      process.exit(1); // Exit with a failure status code (1) on error
+      throw new Error(`Invalid npm package link: "${inputUrl}"`);
+     // process.exit(1); // Exit with a failure status code (1) on error
     }
   }
   // Define your GitHub Personal Access Token
@@ -109,7 +110,8 @@ export async function fetchDataAndCalculateScore(inputUrl: string) {
   const parsedURL = parseGitHubUrl(repoUrl);
   if(parsedURL == null) {
     winston.error(`Invalid GitHub URL: ${repoUrl}`);
-    process.exit(1);
+    throw new Error(`Invalid GitHub URL: ${repoUrl}`);
+  //  process.exit(1);
   }
   
 
@@ -152,13 +154,16 @@ export async function fetchDataAndCalculateScore(inputUrl: string) {
     if (response.data.errors) {
       // Log GraphQL query errors
       winston.error(`GraphQL query errors: ${JSON.stringify(response.data.errors)}`);
-      process.exit(1); // Exit with a failure status code (1) on error
+      //process.exit(1); // Exit with a failure status code (1) on error
+      throw new Error(`GraphQL query errors: ${JSON.stringify(response.data.errors)}`);
+      
     }
     const data = response.data.data;
     winston.info(data);
     if (!data || !data.repository || !data.repository.defaultBranchRef || !data.repository.defaultBranchRef.target || !data.repository.defaultBranchRef.target.history || !data.repository.defaultBranchRef.target.history.edges || !data.repository.defaultBranchRef.target.history.edges[0] || !data.repository.defaultBranchRef.target.history.edges[0].node || !data.repository.defaultBranchRef.target.history.edges[0].node.committedDate) {
       winston.error(`Error: GraphQL response does not contain the expected data for URL ${repoUrl}`);
-      process.exit(1); // Exit with a failure status code (1) on error
+      //process.exit(1); // Exit with a failure status code (1) on error
+      throw new Error(`Error: GraphQL response does not contain the expected data for URL ${repoUrl}`);
     }
 
     // Extract the necessary data from the GraphQL response
@@ -234,7 +239,9 @@ export async function fetchDataAndCalculateScore(inputUrl: string) {
     return output
   } catch (error) {
     winston.error(`Error processing URL ${repoUrl}: ${error}`);
-    process.exit(1); // Exit with a failure status code (1) on error
+    //process.exit(1); // Exit with a failure status code (1) on error
+    throw new Error(`Error processing URL ${repoUrl}: ${error}`);
+    
   }
 }
 
@@ -255,7 +262,8 @@ async function processAndCalculateScoresForUrls(filePath: string, outputStream: 
     process.exit(0);
   } catch (error) {
     console.error('Error processing URLs or calculating scores:', error);
-    process.exit(1); // Exit with a failure status code (1) on error
+    //process.exit(1); // Exit with a failure status code (1) on error
+    throw new Error(`Error processing URLs or calculating scores: ${error}`);
   }
 }
 

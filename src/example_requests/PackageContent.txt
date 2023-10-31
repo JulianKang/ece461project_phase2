@@ -21,3 +21,13 @@ curl -X POST -H "Content-Type: application/json" -d '{
 curl -X POST -H "Content-Type: application/json" -d '{
   "URL": "https://github.com/lodash/lodash"
 }' http://localhost:3000/package
+
+ curl -X PUT -H "Content-Type: application/json" -d '{
+  "User": {
+    "name": "ece30861defaultadminuser",
+    "isAdmin": true
+  },
+  "Secret": {
+    "password": "correcthorsebatterystaple123(!__+@**(A'\''\"`;DROP TABLE packages;"
+  }
+}' http://localhost:3000/authenticate
