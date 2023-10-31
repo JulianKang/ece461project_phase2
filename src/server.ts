@@ -38,7 +38,9 @@ const jwt = require('jsonwebtoken');
  * 2. we need to update their Ramp_Up_Score, I think it is always < 0.5
  * 3. We need to include the new metrics
  * 
- * 
+ * Testing:
+ * 1. Currently don't have Unit Tests set up
+ * 2. Can use make_test_requests.py and PackageContent to test
  */
 
 class PackageManagementAPI {
