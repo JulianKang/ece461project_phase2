@@ -8,6 +8,7 @@
  * ************************************************** */
 import * as fs from 'fs';
 import path from 'path';
+import { DBCommunicator } from './dbCommunicator';
 import {fetchDataAndCalculateScore} from './adjusted_main'
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
@@ -126,12 +127,11 @@ export async function APIHelpPackageURL(url: string, JsProgram:string){
     }
 }
 
-export function authenticateUser(username: string, password: string){
+export function authenticateUser(username: string, password: string): boolean{
     const admin = username === "ece30861defaultadminuser" && password === "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;";
     if(admin){
         return true
     }
-    else{
-        //DataBase.authenticate(username, password)
-    }
+    //DataBase.authenticate(username, password)
+    return false // temporary
 }
