@@ -1,9 +1,27 @@
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import {APIHelpPackageContent, APIHelpPackageURL, authenticateUser} from './server_helper'
+import { userType } from './dbCommunicator'
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
+
+/**
+  * A map of functions to user types.
+  */
+const functionMinPermissions = {
+  handleSearchPackages: userType.guest,
+  handleReset: userType.admin,
+  handleGetPackageById: userType.guest,
+  handleUpdatePackageById: userType.admin,
+  handleDeletePackageById: userType.admin,
+  handleCreatePackage: userType.admin,
+  handleRatePackage: userType.guest,
+  handleAuthenticateUser: userType.guest,
+  handleGetPackageByName: userType.guest,
+  handleDeletePackageByName: userType.admin,
+  handleSearchPackagesByRegex: userType.guest
+}
 
 /**
  * PackageManagementAPI
@@ -73,6 +91,11 @@ class PackageManagementAPI {
     this.app.post('/package/byRegEx', this.handleSearchPackagesByRegex.bind(this));
   }
 
+  // Returns the Express app object (used in testing)
+  public getApp() : express.Express {
+    return this.app;
+  }
+
   // Middleware for authentication (placeholder)
   private authenticate(req: Request, res: Response, next: NextFunction) {
     // Check the request path to skip authentication for specific routes
@@ -92,10 +115,12 @@ class PackageManagementAPI {
     }
   }
 
+  // endpoint: '/' GET
   private handleDefault(req: Request, res: Response) {
     res.send('Welcome to the package management API!');
   }
 
+  // endpoint: '/packages' POST
   private async handleSearchPackages(req: Request, res: Response) {
     // Skeleton package creation logic (replace with actual logic)
     // You can access request data using req.body
@@ -113,7 +138,7 @@ class PackageManagementAPI {
     res.status(201).json(returnPackage);
   }
 
-
+  // endpoint: '/package' POST
   private async handleCreatePackage(req: Request, res: Response) {
     // Skeleton package creation logic (replace with actual logic)
     // You can access request data using req.body
@@ -181,6 +206,7 @@ class PackageManagementAPI {
     }
   }
 
+  // endpoint: '/reset' DELETE
   private handleReset(req: Request, res: Response) {
     // Skeleton system reset logic (replace with actual logic)
     // For example, you can clear data or perform other reset actions
@@ -198,6 +224,7 @@ class PackageManagementAPI {
     res.json({ message: 'System reset successfully' });
   }
 
+  // endpoint: '/package/:id' GET
   private handleGetPackageById(req: Request, res: Response) {
     // Skeleton logic to retrieve a package by ID (replace with actual logic)
     // You can access the ID using req.params.id
@@ -239,6 +266,7 @@ class PackageManagementAPI {
       return res.status(200).json(package_result);
   }
 
+  // endpoint: '/package/:id' PUT
   private handleUpdatePackageById(req: Request, res: Response) {
     // Skeleton logic to update a package by ID (replace with actual logic)
     // You can access the ID using req.params.id and data using req.body
@@ -308,6 +336,7 @@ class PackageManagementAPI {
       });
   }
 
+  // endpoint: '/package/:id' DELETE
   private handleDeletePackageById(req: Request, res: Response) {
     // Skeleton logic to delete a package by ID (replace with actual logic)
     // You can access the ID using req.params.id
@@ -348,6 +377,7 @@ class PackageManagementAPI {
       });
   }
 
+  // endpoint: '/package/:id/rate' GET
   private handleRatePackage(req: Request, res: Response) {
     // Skeleton logic to rate a package by ID (replace with actual logic)
     // You can access the ID using req.params.id
@@ -408,8 +438,8 @@ class PackageManagementAPI {
       return res.status(200).json(ratedPackage);
   }
 
-
-  private handleAuthenticateUser(req: Request, res: Response) {
+  // endpoint: '/authenticate' PUT
+  private async handleAuthenticateUser(req: Request, res: Response) {
 
     /**
      * 
@@ -436,12 +466,12 @@ class PackageManagementAPI {
         return;
       }
       // Implement your actual user authentication logic here
-      const isValidUser = authenticateUser(username, password);
+      const isValidUser = await authenticateUser(username, password);
       
       //Temporary 'Base Case' Authentication
       if (isValidUser) {
         // Create the user object to include in the JWT token
-        const userObj =req.body.User
+        const userObj = req.body.User
          /**
           *  {
           username: username,
@@ -462,6 +492,7 @@ class PackageManagementAPI {
     }
   }
 
+  // endpoint: '/package/byName/:name' GET
   private handleGetPackageByName(req: Request, res: Response) {
     // Skeleton logic to retrieve a package by name (replace with actual logic)
     // You can access the name using req.params.name
@@ -502,6 +533,7 @@ class PackageManagementAPI {
       return res.status(200).json(packageHistory);
   }
 
+  // endpoint: '/package/byName/:name' DELETE
   private handleDeletePackageByName(req: Request, res: Response) {
     // Skeleton logic to delete a package by name (replace with actual logic)
     // You can access the name using req.params.name
@@ -543,6 +575,7 @@ class PackageManagementAPI {
       });
   }
 
+  // endpoint: '/package/byRegEx' POST
   private handleSearchPackagesByRegex(req: Request, res: Response) {
     // Skeleton logic to search packages by regex (replace with actual logic)
     // You can access the search parameters using req.body
@@ -583,6 +616,7 @@ class PackageManagementAPI {
       return res.status(200).json(searchResults);
   }
 
+  // Start the server on the specified port
   start(port: number) {
     this.app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
@@ -591,4 +625,4 @@ class PackageManagementAPI {
 }
 
 const apiServer = new PackageManagementAPI();
-apiServer.start(3000);
+apiServer.start(8080); // alternative port for http - https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers

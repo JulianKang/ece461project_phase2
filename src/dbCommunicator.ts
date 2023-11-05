@@ -6,6 +6,17 @@ import mysql from 'mysql2/promise';
 import 'dotenv/config';
 import { type } from 'node:os';
 
+/** 
+ * An enum for the different user types.
+ * Highest permission level is admin, lowest is guest.
+ * Keep user type values in order from lowest to highest permission level (if possible).
+ */
+export enum userType {
+  guest,
+  user,
+  admin
+}
+
 /**
  * Database configuration object.
  */
