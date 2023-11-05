@@ -23,6 +23,8 @@ type QueryResult = mysql.OkPacket | mysql.RowDataPacket[] | mysql.ResultSetHeade
 
 /* TODO List / Things to Implement/Consider:
     * - Add the logger to the DBCommunicator class
+    * - Create authorization levels for the database
+    * - Add a way to check user permissions for certain queries (function, method, etc.)
     * - tests
     * - Database Connection Pooling:
         Consider using a connection pool for your database connections. 
@@ -59,6 +61,7 @@ type QueryResult = mysql.OkPacket | mysql.RowDataPacket[] | mysql.ResultSetHeade
  */
 class DBCommunicator {
   private connection : mysql.Connection | null = null;
+  private authorization : string | null = null;
 
   /**
    * Constructor for DBCommunicator.
@@ -78,6 +81,20 @@ class DBCommunicator {
     } catch (error) {
       console.error('Error connecting to the database:', error); // replace with logger when we gain access to it
     }
+  }
+
+  /**
+   * Authenticates a user with the given username and password.
+   * @returns A promise that resolves with the user's permission if the user is authenticated, null otherwise.
+   */
+  public async authenticateUser(username: string, password: string): Promise<string | null> {
+    const sql = 'SELECT user_type FROM users WHERE username = ? AND password = ?';
+    const values = [username, password];
+    const result : QueryResult | null = await this.query(sql, values);
+    if (result == null || !Array.isArray(result) || result.length === 0) {
+      return null;
+    }
+    return (result[0] as mysql.RowDataPacket).user_type;
   }
 
   /**
