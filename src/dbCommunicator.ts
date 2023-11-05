@@ -90,21 +90,14 @@ class DBCommunicator {
    * @returns A promise that resolves with the a boolean of access permission or false on error.
    */
   private async checkPermission(userRoleId: number, queryType: string, query: string): Promise<boolean | false> {
-    if (!this.connection) {
-      console.error('Database connection not established.'); // replace with logger when we gain access to it
+    const sql = 'SELECT COUNT(*) as count FROM permissions WHERE role_id = ? AND (query_type = ? OR (query_type IS NULL AND query = ?))';
+    const values = [userRoleId, queryType, query];
+    const result : QueryResult | null = await this.query(sql, values);
+    if (result == null || !Array.isArray(result) || result.length === 0) {
       return false;
     }
     // Query the permissions table to check if the role has permission for the given query type and/or specific query
-    try{
-      const [rows,] = await this.connection.execute(
-          'SELECT COUNT(*) as count FROM permissions WHERE role_id = ? AND (query_type = ? OR (query_type IS NULL AND query = ?))',
-          [userRoleId, queryType, query]
-      );
-      return (rows as any)[0].count > 0;
-    } catch (error) {
-      console.error('Database query error:', error); // replace with logger when we gain access to it
-      return false;
-    }
+    return (result as any)[0].count > 0;
   }
 
   /**
