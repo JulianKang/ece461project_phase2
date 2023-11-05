@@ -93,6 +93,37 @@ class DBCommunicator {
       console.error('Error connecting to the database:', error); // replace with logger when we gain access to it
     }
   }
+  /**
+   * Checks if a user is allowed to execute a given SQL query on the connected database.
+   * @param userRoleId - The ID of the user trying to query the DB
+   * @param queryType - The type of query wanted to execute ONLY ALLOWS ('SELECT', 'INSERT', 'UPDATE', 'DELETE')
+   * @param query - The SQL query wanted to execute.
+   * @returns A promise that resolves with the a boolean of access permission or false on error.
+   */
+  private async checkPermission(userRoleId: number, queryType: string, query: string): Promise<boolean | false> {
+    const sql = 'SELECT COUNT(*) as count FROM permissions WHERE role_id = ? AND (query_type = ? OR (query_type IS NULL AND query = ?))';
+    const values = [userRoleId, queryType, query];
+    const result : QueryResult | null = await this.query(sql, values);
+    if (result == null || !Array.isArray(result) || result.length === 0) {
+      return false;
+    }
+    // Query the permissions table to check if the role has permission for the given query type and/or specific query
+    return (result as any)[0].count > 0;
+  }
+
+  /**
+   * Authenticates a user with the given username and password.
+   * @returns A promise that resolves with the user's permission if the user is authenticated, null otherwise.
+   */
+  public async authenticateUser(username: string, password: string): Promise<string | null> {
+    const sql = 'SELECT user_type FROM users WHERE username = ? AND password = ?';
+    const values = [username, password];
+    const result : QueryResult | null = await this.query(sql, values);
+    if (result == null || !Array.isArray(result) || result.length === 0) {
+      return null;
+    }
+    return (result[0] as mysql.RowDataPacket).user_type;
+  }
 
   /**
    * Authenticates a user with the given username and password.
@@ -121,8 +152,23 @@ class DBCommunicator {
     }
 
     try {
-      const [rows, fields] = await this.connection.execute(sql, values);
-      return rows;
+      //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      const userRoleId = 1;/* Get user's role ID from the database */ 
+      //^THIS NEEDS TO CHANGE CANNOT BE HARD CODED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      const queryWords = sql.split(' ');
+      const queryTypeToCheck = queryWords[0].toUpperCase();
+
+      const hasPermission = await this.checkPermission(userRoleId, queryTypeToCheck, sql);
+
+      if (hasPermission) {
+        const [rows, fields] = await this.connection.execute(sql, values);
+        return rows;
+      } else {
+        console.log('No permission for query: ', sql); // replace with logger when we gain access to it
+        return null;
+      }
+      
     } catch (error) {
       console.error('Database query error:', error); // replace with logger when we gain access to it
       return null;
