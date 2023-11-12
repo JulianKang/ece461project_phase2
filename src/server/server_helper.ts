@@ -8,8 +8,9 @@
  * ************************************************** */
 import * as fs from 'fs';
 import path from 'path';
-import DBCommunicator from './dbCommunicator';
-import {fetchDataAndCalculateScore} from './adjusted_main'
+import DBCommunicator from '../dbCommunicator';
+import {fetchDataAndCalculateScore} from '../adjusted_main'
+import * as SE from './server_errors'
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
 
@@ -139,4 +140,11 @@ export async function getUserAPIKey(username: string, password: string): Promise
     }
 
     return authenication;
+}
+
+// TODO explicitly define the typings and set return once DBCommunicator is implemented for package search
+export async function searchPackages(processedREQ: any){
+    const {query, limit, offset} = processedREQ;
+    // const search_results = await DBCommunicator.searchPackages(query, limit, offset);
+    return null;
 }

@@ -1,8 +1,10 @@
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import * as helper from './server_helper'
-import { userType } from './dbCommunicator'
+import { userType } from '../dbCommunicator'
 import e from 'express';
+import dbCommunicator from '../dbCommunicator';
+import * as SE from './server_errors'
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
@@ -66,6 +68,7 @@ class PackageManagementAPI {
   private app: express.Express;
   private packages: any[];
   private nextPackageId: number;
+  private database = dbCommunicator; 
 
   constructor() {
     this.app = express();
@@ -76,7 +79,7 @@ class PackageManagementAPI {
 
     // Middleware
     this.app.use(this.authenticate);
-    this.app.use(this.unknownError);
+    this.app.use(this.ErrorHandler);
 
     // Define routes
     this.app.get('/', this.handleDefault.bind(this));
@@ -101,7 +104,7 @@ class PackageManagementAPI {
   }
 
   // Middleware for unknown errors
-  private unknownError(err: unknown, req: Request, res: Response, next: NextFunction) {
+  private ErrorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
     console.error(err); // TODO replace whith actual error logging logic
     let errorMessage = 'An unknown error occurred.';
     let statusCode = 500;
@@ -127,6 +130,10 @@ class PackageManagementAPI {
       res.status(401).json({ message: 'Authentication failed' });
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////// ENDPOINTS /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
   // endpoint: '/' GET
   private handleDefault(req: Request, res: Response) {
     res.send('Welcome to the package management API!');
@@ -136,6 +143,7 @@ class PackageManagementAPI {
   private async handleSearchPackages(req: Request, res: Response) {
     // Skeleton package creation logic (replace with actual logic)
     // You can access request data using req.body
+    const data = req.body;
     /**
      * 200	
       List of packages
@@ -146,6 +154,25 @@ class PackageManagementAPI {
       413	
       Too many packages returned.
      */
+    // check format
+    try {
+      let processedREQ = data; // TODO discuss how req should be formatted
+      // ask database and process
+    
+      let dbResp = helper.searchPackages(processedREQ); // TODO what is necessary from DB to get packages
+      // TODO process dbResp
+    
+    } catch(error) {
+      if (error instanceof SE.Server_400) {
+      } 
+      else if (error instanceof SE.Server_413) {
+      }
+      else {
+
+      }
+      return;
+    }
+
     const returnPackage = req.body;
     res.status(201).json(returnPackage);
   }
