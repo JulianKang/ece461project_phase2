@@ -127,7 +127,7 @@ export async function APIHelpPackageURL(url: string, JsProgram:string){
     }
 }
 
-export async function authenticateUser(username: string, password: string): Promise<string|boolean> {
+export async function getUserAPIKey(username: string, password: string): Promise<string|boolean> {
     // const admin = username === "ece30861defaultadminuser" && password === "correcthorsebatterystaple123(!__+@**(A'\"`;DROP TABLE packages;";
     // if(admin){
     //     return true

@@ -1,7 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
-import {APIHelpPackageContent, APIHelpPackageURL, authenticateUser} from './server_helper'
+import * as helper from './server_helper'
 import { userType } from './dbCommunicator'
+import e from 'express';
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
@@ -73,8 +74,9 @@ class PackageManagementAPI {
     this.packages = [];
     this.nextPackageId = 1;
 
-    // Middleware for authentication (placeholder)
+    // Middleware
     this.app.use(this.authenticate);
+    this.app.use(this.unknownError);
 
     // Define routes
     this.app.get('/', this.handleDefault.bind(this));
@@ -89,6 +91,8 @@ class PackageManagementAPI {
     this.app.get('/package/byName/:name', this.handleGetPackageByName.bind(this));
     this.app.delete('/package/byName/:name', this.handleDeletePackageByName.bind(this));
     this.app.post('/package/byRegEx', this.handleSearchPackagesByRegex.bind(this));
+
+
   }
 
   // Returns the Express app object (used in testing)
@@ -96,23 +100,31 @@ class PackageManagementAPI {
     return this.app;
   }
 
+  // Middleware for unknown errors
+  private unknownError(err: unknown, req: Request, res: Response, next: NextFunction) {
+    console.error(err); // TODO replace whith actual error logging logic
+    let errorMessage = 'An unknown error occurred.';
+    let statusCode = 500;
+    
+    res.status(statusCode).json({ error: errorMessage });
+  }
+
   // Middleware for authentication (placeholder)
   private authenticate(req: Request, res: Response, next: NextFunction) {
     // Check the request path to skip authentication for specific routes
     if (req.path === '/authenticate') {
       next(); // Skip authentication for the /authenticate route
-    } else {
+    }
       // Skeleton authentication logic (replace with actual logic)
       // For example, you can check for a valid token here
-      //validAPI = DataBase.checkAPIKey(api)
+      // let userAPIKey = helper.getUserAPIKey(req.body.User.name, req.body.Secret.password);
 
       //Should we pass a userPermission to the function called?
       if (true) {
         next(); // Authentication successful
-      } else {
-        res.status(401).json({ message: 'Authentication failed' });
       }
-    }
+
+      res.status(401).json({ message: 'Authentication failed' });
   }
 
   // endpoint: '/' GET
@@ -166,7 +178,7 @@ class PackageManagementAPI {
             const newPackage = req.body;
             const url: string = newPackage.URL
             const JsProgram: string = newPackage.JsProgram
-            const result: object  = await APIHelpPackageURL(url, JsProgram)
+            const result: object  = await helper.APIHelpPackageURL(url, JsProgram)
             if ('metadata' in result){
               res.status(201).json(result);
             }
@@ -181,10 +193,10 @@ class PackageManagementAPI {
         else if("Content" in req.body){
             const base64: string = req.body.Content
             const JSprogram: string = req.body.JsProgram
-            const URL: string = await APIHelpPackageContent(base64, JSprogram)
+            const URL: string = helper.APIHelpPackageContent(base64, JSprogram)
             let result: object = {error: "Package Disqualified Rating"}
             if(URL){
-              result = await APIHelpPackageURL(URL, JSprogram)
+              result = await helper.APIHelpPackageURL(URL, JSprogram)
               console.log(result)
             }
             if ('metadata' in result){
@@ -466,7 +478,7 @@ class PackageManagementAPI {
         return;
       }
       // Implement your actual user authentication logic here
-      const isValidUser = await authenticateUser(username, password);
+      const isValidUser = await helper.getUserAPIKey(username, password);
       
       //Temporary 'Base Case' Authentication
       if (isValidUser) {

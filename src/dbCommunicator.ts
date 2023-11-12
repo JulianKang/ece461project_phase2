@@ -100,7 +100,7 @@ class DBCommunicator {
    * @param query - The SQL query wanted to execute.
    * @returns A promise that resolves with the a boolean of access permission or false on error.
    */
-  private async checkPermission(userRoleId: number, queryType: string, query: string): Promise<boolean | false> {
+  private async checkPermission(userRoleId: number, queryType: string, query: string): Promise<boolean> {
     const sql = 'SELECT COUNT(*) as count FROM permissions WHERE role_id = ? AND (query_type = ? OR (query_type IS NULL AND query = ?))';
     const values = [userRoleId, queryType, query];
     const result : QueryResult | null = await this.query(sql, values);
@@ -109,20 +109,6 @@ class DBCommunicator {
     }
     // Query the permissions table to check if the role has permission for the given query type and/or specific query
     return (result as any)[0].count > 0;
-  }
-
-  /**
-   * Authenticates a user with the given username and password.
-   * @returns A promise that resolves with the user's permission if the user is authenticated, null otherwise.
-   */
-  public async authenticateUser(username: string, password: string): Promise<string | null> {
-    const sql = 'SELECT user_type FROM users WHERE username = ? AND password = ?';
-    const values = [username, password];
-    const result : QueryResult | null = await this.query(sql, values);
-    if (result == null || !Array.isArray(result) || result.length === 0) {
-      return null;
-    }
-    return (result[0] as mysql.RowDataPacket).user_type;
   }
 
   /**
