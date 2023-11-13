@@ -106,8 +106,8 @@ class PackageManagementAPI {
 
   // Middleware for error handling
   private ErrorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
-    let errorMessage = 'An unknown error occurred.';
-    let statusCode = 500;
+    let errorMessage: string;
+    let statusCode: number;
   
     // Collect multiple errors in an array
     const errors: Error[] = Array.isArray(err) ? err : [err];
@@ -115,24 +115,12 @@ class PackageManagementAPI {
       err = new AggregateError(errors);
     }
 
-    // Check if the error is a known error type
-    const errorStatusMap: { [key: string]: number } = {
-      'Server_400': 400,
-      'Server_401': 401,
-      'Server_404': 404,
-      'Server_409': 409,
-      'Server_413': 413,
-      'Server_424': 424,
-      'AggregateError': 500 // TODO replace with a more appropriate status code or handling process
-    };
-  
-    const errorType = err.constructor.name;
-    if (errorStatusMap[errorType]) {
-      errorMessage = err.message;
-      statusCode = errorStatusMap[errorType];
-    }
-  
-    // If there are multiple errors, create an AggregateError
+    errorMessage = err.message;
+    statusCode = (err instanceof Server_Error)   ? err.num : 
+                 (err instanceof AggregateError) ? 500     : // TODO replace with more appropriate error code
+                                                   500; // default to 500
+
+    // Log and send the error          
     console.error(err); // TODO replace with actual error logging logic
     res.status(statusCode).json({ error: errorMessage });
   }
