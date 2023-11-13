@@ -9,6 +9,32 @@
  * 500: Internal Server Error, ex database error
  * 501: Not Implemented, ie API endpoint not implemented
  */
+const DEFAULT_SERVER_ERRORS: { [key: number]: string } = { 
+    400: "Bad Request",
+    401: "Unauthorized",
+    404: "Not Found",
+    409: "Conflict",
+    413: "Payload Too Large",
+    424: "Failed Dependency",
+    500: "Internal Server Error",
+    501: "Not Implemented"
+}
+
+export class Server_Error extends Error { 
+    num: number;
+
+    constructor(num:number, str:string|null) {
+        let message = str!=null ? str : 
+                      num in DEFAULT_SERVER_ERRORS ? DEFAULT_SERVER_ERRORS[num] :
+                        "Unknown Server Error or Default Error not Found";
+        
+        super(message);
+        this.name = num.toString();
+        this.num = num
+    }
+
+}
+
 export class AggregateError extends Error {
     errors: Error[];
     
@@ -16,77 +42,5 @@ export class AggregateError extends Error {
         super('Multiple errors occurred');
         this.name = 'AggregateError';
         this.errors = errors;
-    }
-}
-
-export class Server_400 extends Error {
-    constructor(message:string|null) {
-        if(!message) 
-            message = "Bad/Invalid Request";
-        super(message);
-        this.name = "400";
-    }
-}
-
-export class Server_401 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Invalid Authentication";
-        super(message);
-        this.name = "401";
-    }
-}
-
-export class Server_404 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Not Found";
-        super(message);
-        this.name = "404";
-    }
-}
-
-export class Server_409 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Conflict - Package Already Exists";
-        super(message);
-        this.name = "409";
-    }
-}
-
-export class Server_413 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Payload Too Large";
-        super(message);
-        this.name = "413";
-    }
-}
-
-export class Server_424 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Failed Dependency - Package is not uploaded due to the disqualified rating.";
-        super(message);
-        this.name = "424";
-    }
-}
-
-export class Server_500 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Internal Server Error";
-        super(message);
-        this.name = "500";
-    }
-}
-
-export class Server_501 extends Error {
-    constructor(message:string|null) {
-        if(!message)
-            message = "Not Implemented";
-        super(message);
-        this.name = "501";
     }
 }

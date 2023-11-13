@@ -4,7 +4,7 @@ import * as helper from './server_helper'
 import { userType } from '../dbCommunicator'
 import e from 'express';
 import dbCommunicator from '../dbCommunicator';
-import * as SE from './server_errors'
+import {Server_Error} from './server_errors'
 import { stat } from 'fs';
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
@@ -153,7 +153,7 @@ class PackageManagementAPI {
       next(); // Authentication successful
     }
     
-    throw new SE.Server_401('Authentication failed');
+    throw new Server_Error(401, 'Authentication failed');
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,10 +182,10 @@ class PackageManagementAPI {
       Too many packages returned.
      */
     if (!Array.isArray(data)) {
-      throw new SE.Server_400(null);
+      throw new Server_Error(400, null);
     }
     if (data.length > 100) {
-      throw new SE.Server_413(null);
+      throw new Server_Error(413, null);
     }
 
     // ask database and process
@@ -220,7 +220,7 @@ class PackageManagementAPI {
      */
     try{
         if("URL" in req.body && "Content" in req.body || !("JSProgram" in req.body)){
-          throw new SE.Server_400('There is missing field(s) in the PackageData/AuthenticationToken or it is formed improperly (e.g. Content and URL are both set)');
+          throw new Server_Error(400, 'There is missing field(s) in the PackageData/AuthenticationToken or it is formed improperly (e.g. Content and URL are both set)');
         }
         if("URL" in req.body){
             const newPackage = req.body;
@@ -231,10 +231,10 @@ class PackageManagementAPI {
               res.status(201).json(result);
             }
             else if ('package already exists' in result){
-              throw new SE.Server_409("Package exists already");
+              throw new Server_Error(409, "Package exists already");
             }
             else {
-              throw new SE.Server_424("Package Disqualified Rating");
+              throw new Server_Error(424, "Package Disqualified Rating");
             }
         }
         // Content needs progress. Can currently Unzip but don't know how to analyze the metric scores.
@@ -251,18 +251,18 @@ class PackageManagementAPI {
                 res.status(201).json(result);
             }
             else if ('package exists' in result){
-              throw new SE.Server_409("Package exists already");
+              throw new Server_Error(409, "Package exists already");
             }
             else {
-              throw new SE.Server_424("Package Disqualified Rating");
+              throw new Server_Error(424, "Package Disqualified Rating");
             }
         }
         else{
-          throw new SE.Server_400('There is missing field(s)');
+          throw new Server_Error(400, 'There is missing field(s)');
         }
     }
     catch(error){
-      throw new SE.Server_400('There is missing field(s) in the PackageData/AuthenticationToken or it is formed improperly (e.g. Content and URL are both set)');
+      throw new Server_Error(400, 'There is missing field(s) in the PackageData/AuthenticationToken or it is formed improperly (e.g. Content and URL are both set)');
     }
   }
 
@@ -304,7 +304,7 @@ class PackageManagementAPI {
 
       // Check if packageId is provided and is not empty
       if (!packageId) {
-        throw new SE.Server_400('Package ID is missing or invalid.');
+        throw new Server_Error(400, 'Package ID is missing or invalid.');
       }
   
       // Perform database query or other actions to get the package by ID
@@ -313,7 +313,7 @@ class PackageManagementAPI {
   
       if (!package_result) {
           // Package not found
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully retrieved the package
@@ -344,7 +344,7 @@ class PackageManagementAPI {
       const missingTopLevelFields = requiredTopLevelFields.filter(field => !updatedPackageData[field]);
   
       if (missingTopLevelFields.length > 0) {
-        throw new SE.Server_400(`Missing required top-level fields: ${missingTopLevelFields.join(', ')}`);
+        throw new Server_Error(400, `Missing required top-level fields: ${missingTopLevelFields.join(', ')}`);
       }
   
       // Check for required subfields within 'metadata' and 'data'
@@ -353,7 +353,7 @@ class PackageManagementAPI {
           const missingMetadataFields = requiredMetadataFields.filter(field => !updatedPackageData.metadata[field]);
   
           if (missingMetadataFields.length > 0) {
-            throw new SE.Server_400(`Missing required 'metadata' subfields: ${missingMetadataFields.join(', ')}`);
+            throw new Server_Error(400, `Missing required 'metadata' subfields: ${missingMetadataFields.join(', ')}`);
           }
       }
   
@@ -362,7 +362,7 @@ class PackageManagementAPI {
           const missingDataFields = requiredDataFields.filter(field => !updatedPackageData.data[field]);
   
           if (missingDataFields.length > 0) {
-            throw new SE.Server_400(`Missing required 'data' subfields: ${missingDataFields.join(', ')}`);
+            throw new Server_Error(400, `Missing required 'data' subfields: ${missingDataFields.join(', ')}`);
           }
       }
   
@@ -372,7 +372,7 @@ class PackageManagementAPI {
   
       if (!updatedPackage) {
           // Package does not exist
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully updated package
@@ -401,7 +401,7 @@ class PackageManagementAPI {
 
       // Check if the package ID is provided
       if (!packageId) {
-        throw new SE.Server_400('Package ID is missing or invalid.');
+        throw new Server_Error(400, 'Package ID is missing or invalid.');
       }
   
       // Perform database delete or other actions to delete the package
@@ -410,7 +410,7 @@ class PackageManagementAPI {
   
       if (!deletedPackage) {
           // Package does not exist
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully deleted package
@@ -441,7 +441,7 @@ class PackageManagementAPI {
   
       // Check if the package ID is provided
       if (!packageId) {
-        throw new SE.Server_400('Package ID is missing or invalid.');
+        throw new Server_Error(400, 'Package ID is missing or invalid.');
       }
   
       // Check for required fields in the rating data
@@ -458,7 +458,7 @@ class PackageManagementAPI {
   
       const missingFields = requiredFields.filter(field => typeof ratingData[field] !== 'number');
       if (missingFields.length > 0) {
-        throw new SE.Server_400(`Missing or invalid rating fields: ${missingFields.join(', ')}`);
+        throw new Server_Error(400, `Missing or invalid rating fields: ${missingFields.join(', ')}`);
       }
   
       // Perform rating logic or database updates here
@@ -467,7 +467,7 @@ class PackageManagementAPI {
   
       if (!ratedPackage) {
           // Package does not exist
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully rated package
@@ -476,7 +476,7 @@ class PackageManagementAPI {
 
   // endpoint: '/authenticate' PUT
   private async handleAuthenticateUser(req: Request, res: Response) {
-    throw new SE.Server_501('This system does not support authentication.');
+    throw new Server_Error(501, 'This system does not support authentication.');
     /**
      * 
      * 200	
@@ -506,7 +506,7 @@ class PackageManagementAPI {
       
       //Temporary 'Base Case' Authentication
       if (!isValidUser) {
-        throw new SE.Server_401('User or Password is invalid');
+        throw new Server_Error(401, 'User or Password is invalid');
       }
         // Create the user object to include in the JWT token
         const userObj = req.body.User
@@ -548,7 +548,7 @@ class PackageManagementAPI {
 
       // Check if the package name is provided
       if (!packageName) {
-        throw new SE.Server_400('Package name is missing or invalid.');
+        throw new Server_Error(400, 'Package name is missing or invalid.');
       }
   
       // Perform a database query or other actions to retrieve the package history by name
@@ -557,7 +557,7 @@ class PackageManagementAPI {
   
       if (!packageHistory) {
           // Package does not exist
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully retrieved package history
@@ -584,7 +584,7 @@ class PackageManagementAPI {
 
       // Check if the package name is provided
       if (!packageName) {
-        throw new SE.Server_400('Package name is missing or invalid.');
+        throw new Server_Error(400, 'Package name is missing or invalid.');
       }
   
       // Perform database delete or other actions to delete the package by name
@@ -593,7 +593,7 @@ class PackageManagementAPI {
   
       if (!deletedPackage) {
           // Package does not exist
-          throw new SE.Server_404('Package not found.');
+          throw new Server_Error(404, 'Package not found.');
       }
   
       // Successfully deleted package
@@ -623,7 +623,7 @@ class PackageManagementAPI {
 
       // Check if the regex pattern is provided
       if (!regexPattern) {
-        throw new SE.Server_400('Regular expression pattern is missing.');
+        throw new Server_Error(400, 'Regular expression pattern is missing.');
       }
   
       // Perform a search using the regex pattern
@@ -632,7 +632,7 @@ class PackageManagementAPI {
   
       if (searchResults.length === 0) {
           // No packages found matching the regex
-          throw new SE.Server_404('No package found under this regex.');
+          throw new Server_Error(404, 'No package found under this regex.');
       }
   
       // Successfully retrieved search results
