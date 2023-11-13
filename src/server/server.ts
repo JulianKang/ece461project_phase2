@@ -4,7 +4,7 @@ import * as helper from './server_helper'
 import { userType } from '../dbCommunicator'
 import e from 'express';
 import dbCommunicator from '../dbCommunicator';
-import {Server_Error} from './server_errors'
+import { Server_Error, AggregateError } from './server_errors'
 import { stat } from 'fs';
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
@@ -112,7 +112,7 @@ class PackageManagementAPI {
     // Collect multiple errors in an array
     const errors: Error[] = Array.isArray(err) ? err : [err];
     if (errors.length > 1) {
-      err = new SE.AggregateError(errors);
+      err = new AggregateError(errors);
     }
 
     // Check if the error is a known error type
