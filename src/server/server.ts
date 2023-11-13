@@ -182,10 +182,10 @@ class PackageManagementAPI {
       Too many packages returned.
      */
     if (!Array.isArray(data)) {
-      throw new Server_Error(400, null);
+      throw new Server_Error(400, "There is missing field(s) in the PackageQuery/AuthenticationToken or it is formed improperly, or the AuthenticationToken is invalid.");
     }
     if (data.length > 100) {
-      throw new Server_Error(413, null);
+      throw new Server_Error(413, "Too many packages returned.");
     }
 
     // ask database and process
