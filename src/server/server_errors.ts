@@ -6,7 +6,18 @@
  * 409: Conflict, ie package already exists
  * 413: Payload Too Large, ie too many packages returned
  * 424: Failed Dependency, ie package is not uploaded due to the disqualified rating.
+ * 500: Internal Server Error, ex database error
+ * 501: Not Implemented, ie API endpoint not implemented
  */
+export class AggregateError extends Error {
+    errors: Error[];
+    
+    constructor(errors: Error[]) {
+        super('Multiple errors occurred');
+        this.name = 'AggregateError';
+        this.errors = errors;
+    }
+}
 
 export class Server_400 extends Error {
     constructor(message:string|null) {
@@ -59,5 +70,23 @@ export class Server_424 extends Error {
             message = "Failed Dependency - Package is not uploaded due to the disqualified rating.";
         super(message);
         this.name = "424";
+    }
+}
+
+export class Server_500 extends Error {
+    constructor(message:string|null) {
+        if(!message)
+            message = "Internal Server Error";
+        super(message);
+        this.name = "500";
+    }
+}
+
+export class Server_501 extends Error {
+    constructor(message:string|null) {
+        if(!message)
+            message = "Not Implemented";
+        super(message);
+        this.name = "501";
     }
 }

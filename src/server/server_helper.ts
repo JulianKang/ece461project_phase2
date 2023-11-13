@@ -108,13 +108,14 @@ export async function APIHelpPackageURL(url: string, JsProgram:string){
         // upload includes data for success_response or error
         // if error in upload: {return alread_exists_response} else{} do whats below
         const success_response = { //temp success_response, would really want to return data base object
-            "metadata": {
-              "Name": "Underscore",
-              "Version": "1.0.0",
-              "ID": "underscore"
-            },
-            "data": {
-              "Content": "Base64 of zipfile"}
+                "metadata": {
+                  "Name": "Underscore",
+                  "Version": "1.0.0",
+                  "ID": "underscore"
+                },
+                "data": {
+                  "Content": "Base64 of zipfile"
+                }
             }
 
         return success_response
@@ -143,7 +144,7 @@ export async function getUserAPIKey(username: string, password: string): Promise
 }
 
 // TODO explicitly define the typings and set return once DBCommunicator is implemented for package search
-export async function searchPackages(processedREQ: any){
+export async function queryForPackage(processedREQ: any){
     const {query, limit, offset} = processedREQ;
     // const search_results = await DBCommunicator.searchPackages(query, limit, offset);
     return null;
