@@ -117,7 +117,7 @@ class PackageManagementAPI {
 
     errorMessage = err.message;
     statusCode = (err instanceof Server_Error)   ? err.num : 
-                 (err instanceof AggregateError) ? 500     : // TODO replace with more appropriate error code
+                 (err instanceof AggregateError) ? 500     : // TODO replace with more appropriate error code, or add .num to AggregateError
                                                    500; // default to 500
 
     // Log and send the error          
