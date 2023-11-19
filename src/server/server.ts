@@ -6,6 +6,7 @@ import e from 'express';
 import dbCommunicator from '../dbCommunicator';
 import { Server_Error, AggregateError } from './server_errors'
 import { stat } from 'fs';
+import logger from '../logger'
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
@@ -121,7 +122,7 @@ class PackageManagementAPI {
                                                    500; // default to 500
 
     // Log and send the error          
-    console.error(err); // TODO replace with actual error logging logic
+    logger.error(`${err}`); // TODO replace with actual error logging logic
     res.status(statusCode).json({ error: errorMessage });
   }
 
@@ -233,7 +234,7 @@ class PackageManagementAPI {
             let result: object = {error: "Package Disqualified Rating"}
             if(URL){
               result = await helper.APIHelpPackageURL(URL, JSprogram)
-              console.log(result)
+              logger.info(`${result}`)
             }
             if ('metadata' in result){
                 res.status(201).json(result);
@@ -630,7 +631,7 @@ class PackageManagementAPI {
   // Start the server on the specified port
   start(port: number) {
     this.app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+      logger.info(`Server is running on port ${port}`);
     });
   }
 }

@@ -11,6 +11,7 @@ import path from 'path';
 import DBCommunicator from '../dbCommunicator';
 import {fetchDataAndCalculateScore} from '../adjusted_main'
 import * as SE from './server_errors'
+import logger from '../logger';
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
 
@@ -56,11 +57,11 @@ export function APIHelpPackageContent(base64: string, JsProgram: string) {
         
                 // Write the entry data to the corresponding file
                 fs.writeFileSync(outputPath, entryData);
-                //console.log(`Extracted: ${entryName}`);
+                //logger.info(`Extracted: ${entryName}`);
         
                 // Check for package.json with GitHub URL
                 if (entryName.includes('package.json')) {
-                    //console.log('here');
+                    //logger.info('here');
                     const packageJson = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
                     if (packageJson.repository && packageJson.repository.url) {
                         gitRemoteUrl = packageJson.repository.url.split('+')[1].replace('.git', '');
@@ -70,12 +71,12 @@ export function APIHelpPackageContent(base64: string, JsProgram: string) {
             }
         });
         fs.rmSync(unzipDir, { recursive: true });
-        //console.log('ZIP file extraction complete.');
-        //console.log(gitRemoteUrl)
+        //logger.info('ZIP file extraction complete.');
+        //logger.info(gitRemoteUrl)
 
         return gitRemoteUrl
     } catch (error) {
-        console.log(error)
+        logger.error(`${error}`)
         return gitRemoteUrl
     }
 }
@@ -90,7 +91,7 @@ export async function APIHelpPackageURL(url: string, JsProgram:string){
         for(const key of keys) {
             const value = result[key as keyof CLIOutput];
             if(typeof value === 'number' && value < 0){
-                //console.log(value)
+                //logger.info(value)
                 return error_response
             }
         }
