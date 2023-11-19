@@ -12,7 +12,7 @@ import DBCommunicator from '../dbCommunicator';
 import {fetchDataAndCalculateScore} from '../adjusted_main'
 import * as SE from './server_errors'
 import logger from '../logger';
-import * as Schemas from './schemas';
+import * as Schemas from '../schemas';
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
 
