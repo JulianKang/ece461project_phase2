@@ -11,22 +11,6 @@ const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
 
-/**
-  * A map of functions to user types.
-  */
-const functionMinPermissions = {
-  handleSearchPackages: userType.guest,
-  handleReset: userType.admin,
-  handleGetPackageById: userType.guest,
-  handleUpdatePackageById: userType.admin,
-  handleDeletePackageById: userType.admin,
-  handleCreatePackage: userType.admin,
-  handleRatePackage: userType.guest,
-  handleAuthenticateUser: userType.guest,
-  handleGetPackageByName: userType.guest,
-  handleDeletePackageByName: userType.admin,
-  handleSearchPackagesByRegex: userType.guest
-}
 
 /**
  * PackageManagementAPI
@@ -44,7 +28,7 @@ const functionMinPermissions = {
     this.app.delete('/package/byName/:name', this.handleDeletePackageByName.bind(this));
     this.app.post('/package/byRegEx', this.handleSearchPackagesByRegex.bind(this));
  * 
- * Current Progres:
+ * Current Progress:
  * 1. Most of Package Ingestion is Complete (handleCreatePackage), URL and zip content can
  * both be analyzed to get metric scores, however, adding package to data base and creating a
  * response code still needs to be done.
@@ -52,9 +36,9 @@ const functionMinPermissions = {
  * 2. Created skeleton responses for all endpoints ( a lot should just be data base queries now and formatting return)
  * 
  * Need to be done:
- * 1. DataBase queries for all functions
- * 2. Authentication
- * 3. Return objects (for successfull queries)
+ * 1. DataBase queries for all functions - database end, functions in development
+ * 2. Authentication - database end, functions in development
+ * 3. Return objects (for successfull queries) - TODO
  * 
  * Issues I see:
  * 1. Their code is slow

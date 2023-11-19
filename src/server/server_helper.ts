@@ -12,20 +12,9 @@ import DBCommunicator from '../dbCommunicator';
 import {fetchDataAndCalculateScore} from '../adjusted_main'
 import * as SE from './server_errors'
 import logger from '../logger';
+import * as types from './schemas';
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
-
-interface CLIOutput {
-    'URL': string;
-    'NET_SCORE': number;
-    'RAMP_UP_SCORE': number;
-    'CORRECTNESS_SCORE': number;
-    'BUS_FACTOR_SCORE': number;
-    'RESPONSIVE_MAINTAINER_SCORE': number;
-    'LICENSE_SCORE': number;
-    [key: string]: number | string;
-  }
-
 
 export function APIHelpPackageContent(base64: string, JsProgram: string) {
     const zipBuffer: Buffer = Buffer.from(base64, 'base64');
@@ -84,12 +73,12 @@ export function APIHelpPackageContent(base64: string, JsProgram: string) {
 export async function APIHelpPackageURL(url: string, JsProgram:string){
     const error_response: object = {error: 'Package is not uploaded due to the disqualified rating.'}
     try {
-        const result: CLIOutput = await fetchDataAndCalculateScore(url);
+        const result: types.CLIOutput = await fetchDataAndCalculateScore(url);
         //Check to see if Scores Fulfill the threshold if not return a different return code
         // Believe they all have to be over 0.5
         const keys: string[] = Object.keys(result)
         for(const key of keys) {
-            const value = result[key as keyof CLIOutput];
+            const value = result[key as keyof types.CLIOutput];
             if(typeof value === 'number' && value < 0){
                 //logger.info(value)
                 return error_response
@@ -145,8 +134,30 @@ export async function getUserAPIKey(username: string, password: string): Promise
 }
 
 // TODO explicitly define the typings and set return once DBCommunicator is implemented for package search
-export async function queryForPackage(processedREQ: any){
-    const {query, limit, offset} = processedREQ;
-    // const search_results = await DBCommunicator.searchPackages(query, limit, offset);
+/*   
+    example input
+    {
+        "Version": "Exact (1.2.3)\nBounded range (1.2.3-2.1.0)\nCarat (^1.2.3)\nTilde (~1.2.0)",
+        "Name": "string"
+    }
+ */
+export async function queryForPackage(Input: types.PackageSearchInput) : Promise<types.PackageContent[] | null>{
+    // process version
+    const versionRegex = /\(([^)]+)\)/;
+    const lines : string[] = Input.Version.split('\n');
+    const versions = lines.map((line) => {
+            const match = line.match(versionRegex);
+            return match ? match[1] : null;
+        }
+    );
+
+    // query DB for package based on name and each requested version
+    for(const version of versions) {
+        // const packageData : types.PackageContent= await DBCommunicator.getPackage(Input.Name, version);
+        // if(packageData){
+        //     return packageData;
+        // }
+    }
+
     return null;
 }
