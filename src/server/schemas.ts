@@ -21,19 +21,19 @@ export interface CLIOutput {
 // Name of a package.
 //     Names should only use typical "keyboard" characters.
 //     The name "*" is reserved. See the /packages API for its meaning.
-type PackageName = string;
+export type PackageName = string;
 
 // Unique identifier for a package.
-type PackageID = string;
+export type PackageID = string;
 
 // Package content as a binary zip
-type PackageContent = string;
+export type PackageContent = string;
 
 // URL to a package.
-type PackageURL = string;
+export type PackageURL = string;
 
 // Package content as a JS program
-type PackageJSProgram = string;
+export type PackageJSProgram = string;
 
 // The "Name" and "Version" are used as a unique identifier pair when uploading a package.
 // The "ID" is used as an internal identifier for interacting with existing packages.
