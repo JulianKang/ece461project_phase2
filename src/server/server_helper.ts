@@ -12,7 +12,7 @@ import DBCommunicator from '../dbCommunicator';
 import {fetchDataAndCalculateScore} from '../adjusted_main'
 import * as SE from './server_errors'
 import logger from '../logger';
-import * as types from './schemas';
+import * as Schemas from './schemas';
 const { Buffer } = require('buffer');
 const AdmZip = require('adm-zip');
 
@@ -73,12 +73,12 @@ export function APIHelpPackageContent(base64: string, JsProgram: string) {
 export async function APIHelpPackageURL(url: string, JsProgram:string){
     const error_response: object = {error: 'Package is not uploaded due to the disqualified rating.'}
     try {
-        const result: types.CLIOutput = await fetchDataAndCalculateScore(url);
+        const result: Schemas.CLIOutput = await fetchDataAndCalculateScore(url);
         //Check to see if Scores Fulfill the threshold if not return a different return code
         // Believe they all have to be over 0.5
         const keys: string[] = Object.keys(result)
         for(const key of keys) {
-            const value = result[key as keyof types.CLIOutput];
+            const value = result[key as keyof Schemas.CLIOutput];
             if(typeof value === 'number' && value < 0){
                 //logger.info(value)
                 return error_response
@@ -141,7 +141,7 @@ export async function getUserAPIKey(username: string, password: string): Promise
         "Name": "string"
     }
  */
-export async function queryForPackage(Input: types.PackageSearchInput) : Promise<types.PackageContent[] | null>{
+export async function queryForPackage(Input: Schemas.PackageSearchInput) : Promise<Schemas.PackageContent[] | null>{
     // process version
     const versionRegex = /\(([^)]+)\)/;
     const lines : string[] = Input.Version.split('\n');
@@ -153,7 +153,7 @@ export async function queryForPackage(Input: types.PackageSearchInput) : Promise
 
     // query DB for package based on name and each requested version
     for(const version of versions) {
-        // const packageData : types.PackageContent= await DBCommunicator.getPackage(Input.Name, version);
+        // const packageData : Schemas.PackageContent= await DBCommunicator.getPackage(Input.Name, version);
         // if(packageData){
         //     return packageData;
         // }
