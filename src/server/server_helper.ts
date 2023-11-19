@@ -141,23 +141,27 @@ export async function getUserAPIKey(username: string, password: string): Promise
         "Name": "string"
     }
  */
-export async function queryForPackage(Input: Schemas.PackageSearchInput) : Promise<Schemas.PackageContent[] | null>{
+export async function queryForPackage(Input: Schemas.PackageQuery) : Promise<Schemas.PackageMetadata[]>{
     // process version
     const versionRegex = /\(([^)]+)\)/;
     const lines : string[] = Input.Version.split('\n');
     const versions = lines.map((line) => {
+        try {
             const match = line.match(versionRegex);
             return match ? match[1] : null;
+        } catch (error) {
+            throw new SE.Server_Error(400, "There is missing field(s) in the PackageQuery/AuthenticationToken or it is formed improperly, or the AuthenticationToken is invalid.")
         }
-    );
+    });
 
     // query DB for package based on name and each requested version
+    let foundPackages : Schemas.PackageMetadata[] = [];
     for(const version of versions) {
-        // const packageData : Schemas.PackageContent= await DBCommunicator.getPackage(Input.Name, version);
-        // if(packageData){
-        //     return packageData;
-        // }
+        const packageData = await DBCommunicator.getPackage(Input.Name, version); // TODO - implement mock DBCommunicator
+        if(packageData){
+            foundPackages.push(packageData);
+        }
     }
 
-    return null;
+    return foundPackages;
 }

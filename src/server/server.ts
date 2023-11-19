@@ -7,6 +7,7 @@ import dbCommunicator from '../dbCommunicator';
 import { Server_Error, AggregateError } from './server_errors'
 import { stat } from 'fs';
 import logger from '../logger'
+import * as Schemas from './schemas';
 const jwt = require('jsonwebtoken');
 // Example Request: curl -X POST -H "Content-Type: application/json" -d 
 //'{"name": "Sample Package", "version": "1.0.0", "data": {"URL": "https://example.com/package.zip"}}' http://localhost:3000/packages
@@ -139,11 +140,12 @@ class PackageManagementAPI {
   }
 
   // endpoint: '/packages' POST
-  private async handleSearchPackages(req: Request, res: Response) {
+  // TODO test
+  private async handleSearchPackages(req: Request, res: Response) : Promise<void> {
     // Skeleton package creation logic (replace with actual logic)
     // You can access request data using req.body
     const data = req.body;
-    let dbResp: any[] = [];
+    let dbResp: Schemas.PackageMetadata[][] = [];
     /**
      * 200	
       List of packages
@@ -162,13 +164,13 @@ class PackageManagementAPI {
     }
 
     // ask database and process
-    data.forEach(async (query:any) => {
+    data.forEach(async (query:Schemas.PackageQuery) => {
       // Query the database for the requested packages
-      dbResp.push(helper.queryForPackage(query));
+      const result = await helper.queryForPackage(query);
+      dbResp.push(result);
     });
   
-    const returnPackage = req.body;
-    res.status(200).json(returnPackage);
+    res.status(200).json(dbResp);
   }
 
   // TODO? endpoint: '/package' POST
